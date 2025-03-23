@@ -10,6 +10,8 @@
 
 #include <json/json.h>
 
+#include <base/format.h>
+
 namespace json
 {
 
@@ -18,7 +20,22 @@ bool JsonSimpleReader::Push(bool array)
     depth++;
     if (depth < countof(stack))
     {
+        stack[depth] = stack[depth - 1];
         stack[depth].array = array;
+        stack[depth].key = ~0u;
+    }
+    return true;
+}
+
+bool JsonSimpleReader::Pop(size_t count)
+{
+    size_t d0 = depth--;
+    if (d0 < countof(stack) && depth < countof(stack))
+    {
+        this->n = count;
+        this->vt = stack[d0].array ? ValueType::Array : ValueType::Object;
+        path[stack[depth].offset] = 0;
+        callback(*this);
     }
     return true;
 }
@@ -58,6 +75,7 @@ bool JsonSimpleReader::ProcessValue(int n, float f, enum ValueType type)
         return true;
     }
 
+    UpdateArrayIndex();
     this->n = n;
     this->f = f;
     this->vt = type;
@@ -72,10 +90,34 @@ bool JsonSimpleReader::ProcessStringValue(Span s)
         return true;
     }
 
+    UpdateArrayIndex();
     this->s = s;
     this->n = this->f = s.Length();
     this->vt = ValueType::String;
     return callback(*this);
+}
+
+void JsonSimpleReader::UpdateArrayIndex()
+{
+    ASSERT(depth < countof(stack));
+    if (stack[depth].array)
+    {
+        stack[depth].key++;
+        format_write_info fwi = { path, &zero };
+        if (depth > 0)
+        {
+            stack[depth].path = fnv1a((const char*)&stack[depth].key, 4, stack[depth - 1].path);
+            fwi.p += stack[depth - 1].offset;
+        }
+        else
+        {
+            stack[depth].path = fnv1a((const char*)&stack[depth].key, 4);
+        }
+
+        format(format_output_mem, &fwi, "[%u]", stack[depth].key);
+        *fwi.p = 0;
+        stack[depth].offset = fwi.p - path;
+    }
 }
 
 async(JsonSimpleReader::Process, fatfs::File& file, Delegate<bool, const JsonSimpleReader&> callback)

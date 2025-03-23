@@ -21,7 +21,9 @@ enum struct ValueType
     Boolean,
     Integer,
     Float,
-    String
+    String,
+    Object,
+    Array,
 };
 
 class JsonSimpleReader
@@ -42,10 +44,10 @@ public:
     bool String(const char* s, size_t len, bool copy) { return ProcessStringValue(Span(s, len)); }
 
     bool StartArray() { return Push(true); }
-    bool EndArray(size_t cnt) { return Pop(); }
+    bool EndArray(size_t cnt) { return Pop(cnt); }
 
     bool StartObject() { return Push(false); }
-    bool EndObject(size_t cnt) { return Pop(); }
+    bool EndObject(size_t cnt) { return Pop(cnt); }
 
     bool Key(const char* s, size_t len, bool copy);
 
@@ -62,13 +64,19 @@ public:
     ID PathFNV() const { return stack[depth].path; }
     /*! FNV1a of the entire path excluding the current key */
     ID ParentFNV() const { return depth ? stack[depth - 1].path : FNV1_BASIS; }
-    /*! FNV1a of the current key */
+    /*! FNV1a of the current key, if @ref IsObject is true */
     ID KeyFNV() const { return stack[depth].key; }
+    /*! Index of the current element, if @ref IsArray is true */
+    size_t Index() const { return stack[depth].key; }
+    /*! Current value is an element of an array */
+    bool IsArray() const { return stack[depth].array; }
+    /*! Current value is an element of an object */
+    bool IsObject() const { return !stack[depth].array; }
 
     /*! Type of the value being processed */
     enum ValueType ValueType() const { return vt; }
     /*! Name of the type of the value being processed */
-    const char* ValueTypeName() const { return STRINGS("Null", "Boolean", "Integer", "Float", "String")[int(vt)]; }
+    const char* ValueTypeName() const { return STRINGS("Null", "Boolean", "Integer", "Float", "String", "Object", "Array")[int(vt)]; }
     /*! Value being processed represented as an integer */
     int IntValue() const { return n; }
     /*! Value being processed represented as a float */
@@ -102,10 +110,11 @@ private:
     rapidjson::Reader rd;
 
     bool Push(bool array);
-    bool Pop() { depth--; return true; }
+    bool Pop(size_t cnt);
 
     bool ProcessValue(int i, float f, enum ValueType type);
     bool ProcessStringValue(Span s);
+    void UpdateArrayIndex();
 };
 
 }

@@ -14,6 +14,7 @@ namespace json
 JsonSimpleWriter::JsonSimpleWriter(fatfs::File& f)
     : os(f), wr(os)
 {
+    wr.SetFormatOptions(rapidjson::kFormatSingleLineArray);
     wr.StartObject();
 }
 
