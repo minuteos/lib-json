@@ -223,7 +223,7 @@ protected:
         RAPIDJSON_ASSERT(Base::level_stack_.GetSize() != 0);  // comments cannot be written at root level
         typename Base::Level* level = Base::level_stack_.template Top<typename Base::Level>();
 
-        if (level->valueCount > 0) {
+        if (level->valueCount > 0 && !level->comment) {
             // terminate last value
             if (!level->inArray) {
                 // must not comment between object key and value
