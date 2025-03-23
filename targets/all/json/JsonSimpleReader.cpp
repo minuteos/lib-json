@@ -17,6 +17,11 @@ namespace json
 
 bool JsonSimpleReader::Push(bool array)
 {
+    if (depth < countof(stack))
+    {
+        UpdateArrayIndex();
+    }
+
     depth++;
     if (depth < countof(stack))
     {
@@ -103,20 +108,27 @@ void JsonSimpleReader::UpdateArrayIndex()
     if (stack[depth].array)
     {
         stack[depth].key++;
-        format_write_info fwi = { path, &zero };
         if (depth > 0)
         {
-            stack[depth].path = fnv1a((const char*)&stack[depth].key, 4, stack[depth - 1].path);
-            fwi.p += stack[depth - 1].offset;
+            stack[depth].offset = stack[depth - 1].offset;
+            stack[depth].path = stack[depth - 1].path;
         }
         else
         {
-            stack[depth].path = fnv1a((const char*)&stack[depth].key, 4);
+            stack[depth].offset = 0;
+            stack[depth].path = FNV1_BASIS;
         }
 
-        format(format_output_mem, &fwi, "[%u]", stack[depth].key);
-        *fwi.p = 0;
-        stack[depth].offset = fwi.p - path;
+        format(+[](void* context, char c) {
+            JsonSimpleReader& self = *(JsonSimpleReader*)context;
+            if (self.stack[self.depth].offset < sizeof(self.path))
+            {
+                self.path[self.stack[self.depth].offset++] = c;
+            }
+            self.stack[self.depth].path = fnv1a(&c, 1, self.stack[self.depth].path);
+        }, this, "[%u]", stack[depth].key);
+
+        path[stack[depth].offset] = 0;
     }
 }
 

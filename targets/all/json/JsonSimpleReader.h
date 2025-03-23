@@ -37,7 +37,7 @@ public:
     #pragma region RapidJson handler interface methods
 
     bool Null() { return ProcessValue(0, NAN, ValueType::Null); }
-    bool Bool(bool b) { return ProcessValue(b, NAN, ValueType::Boolean); }
+    bool Bool(bool b) { return ProcessValue(b, b, ValueType::Boolean); }
     bool Int(int n) { return ProcessValue(n, n, ValueType::Integer); }
     bool Uint(unsigned n) { return ProcessValue(n, n, ValueType::Integer); }
     bool Float(float n) { return ProcessValue(n, n, ValueType::Float); }
@@ -72,6 +72,10 @@ public:
     bool IsArray() const { return stack[depth].array; }
     /*! Current value is an element of an object */
     bool IsObject() const { return !stack[depth].array; }
+    /*! Current value is a primitive value (null, bool or a number) */
+    bool IsPrimitive() const { return vt < ValueType::String; }
+    /*! Current value is a string value */
+    bool IsString() const { return vt == ValueType::String; }
 
     /*! Type of the value being processed */
     enum ValueType ValueType() const { return vt; }
@@ -83,6 +87,19 @@ public:
     float FloatValue() const { return f; }
     /*! Value being processed represented as a string */
     Span StringValue() const { return s; }
+
+    /*! Current stack depth */
+    size_t Depth() const { return depth; }
+    /*! FNV1a of the entire path at the specified depth */
+    ID PathFNV(size_t depth) const { return stack[depth].path; }
+    /*! FNV1a of the key at the specified depth, if @ref IsObject is true */
+    ID KeyFNV(size_t depth) const { return stack[depth].key; }
+    /*! Index of the current element at the specified depth, if @ref IsArray is true */
+    size_t Index(size_t depth) const { return stack[depth].key; }
+    /*! Container at the specified depth is an array */
+    bool IsArray(size_t depth) const { return stack[depth].array; }
+    /*! Container at the specified depth is an object */
+    bool IsObject(size_t depth) const { return !stack[depth].array; }
 
     #pragma endregion
 
