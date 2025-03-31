@@ -61,11 +61,11 @@ public:
     const char* Key() const { return path + stack[depth].offset; }
 
     /*! FNV1a of the entire path including the current key */
-    ID PathFNV() const { return stack[depth].path; }
+    FNV1a PathFNV() const { return stack[depth].path; }
     /*! FNV1a of the entire path excluding the current key */
-    ID ParentFNV() const { return depth ? stack[depth - 1].path : FNV1_BASIS; }
+    FNV1a ParentFNV() const { return depth ? stack[depth - 1].path : FNV1_BASIS; }
     /*! FNV1a of the current key, if @ref IsObject is true */
-    ID KeyFNV() const { return stack[depth].key; }
+    FNV1a KeyFNV() const { return stack[depth].key; }
     /*! Index of the current element, if @ref IsArray is true */
     size_t Index() const { return stack[depth].key; }
     /*! Current value is an element of an array */
@@ -91,9 +91,9 @@ public:
     /*! Current stack depth */
     size_t Depth() const { return depth; }
     /*! FNV1a of the entire path at the specified depth */
-    ID PathFNV(size_t depth) const { return stack[depth].path; }
+    FNV1a PathFNV(size_t depth) const { return stack[depth].path; }
     /*! FNV1a of the key at the specified depth, if @ref IsObject is true */
-    ID KeyFNV(size_t depth) const { return stack[depth].key; }
+    FNV1a KeyFNV(size_t depth) const { return stack[depth].key; }
     /*! Index of the current element at the specified depth, if @ref IsArray is true */
     size_t Index(size_t depth) const { return stack[depth].key; }
     /*! Container at the specified depth is an array */
