@@ -76,8 +76,12 @@ private:
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<float>(const float& v) { Float(v); }
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<unsigned short>(const unsigned short& s) { Int(s); }
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<short>(const short& s) { Int(s); }
+template<> ALWAYS_INLINE void JsonSimpleWriter::Value<unsigned>(const unsigned& u) { Int(u); }
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<int>(const int& i) { Int(i); }
+template<> ALWAYS_INLINE void JsonSimpleWriter::Value<unsigned long>(const unsigned long& u) { Int(u); }
+template<> ALWAYS_INLINE void JsonSimpleWriter::Value<long>(const long& l) { Int(l); }
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<bool>(const bool& b) { Bool(b); }
 template<> ALWAYS_INLINE void JsonSimpleWriter::Value<const char*>(const char* const& s) { wr.String(s); }
+template<> ALWAYS_INLINE void JsonSimpleWriter::Value<Span>(const Span& s) { wr.String(s.Pointer(), s.Length()); }
 
 }
