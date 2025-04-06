@@ -27,6 +27,7 @@ protected:
     const char* Path() const { return path; }
 
     constexpr kernel::Exception Exception() const { return err.Exception(); }
+    void SetResult(intptr_t value) { err = value; }
 
     virtual void OnStart() { }
     virtual bool OnNode(const JsonSimpleReader& rdr) = 0;

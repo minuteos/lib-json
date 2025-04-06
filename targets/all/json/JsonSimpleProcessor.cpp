@@ -15,15 +15,20 @@ namespace json
 
 async_res_t JsonSimpleProcessor::Parse()
 {
-    fatfs::RapidJsonInputStream is(*file);
+    fatfs::RapidJsonInputStream is(*file, path);
+    rapidjson::ParseResult jsonRes;
 
-    OnStart();
-    // minimze stack usage by allocating the reader on the heap
-    auto rdr = new JsonSimpleReader(GetMethodDelegate(this, OnNode));
-    auto jsonRes = rdr->Parse(is);
-    delete rdr;
+    if (!file->GetError())
+    {
+        OnStart();
+        // minimze stack usage by allocating the reader on the heap
+        auto rdr = new JsonSimpleReader(GetMethodDelegate(this, OnNode));
+        jsonRes = rdr->Parse(is);
+        delete rdr;
+    }
 
     err = {};
+
     if (file->GetError())
     {
         err = _ASYNC_RES(file->GetError(), fatfs::Error);
@@ -59,8 +64,6 @@ async_def(
     fatfs::File f;
 )
 {
-    await(f.f.Open, path);  // failing to open the file can throw
-
     this->file = &f.f;
     this->path = path;
     await_catch(kernel::Worker::Run, GetMethodDelegate(this, Parse));
