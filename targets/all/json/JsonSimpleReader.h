@@ -34,6 +34,8 @@ public:
     {
     }
 
+    template<typename InputStream> rapidjson::ParseResult Parse(InputStream& is) { return rd.Parse(is, *this); }
+
     #pragma region RapidJson handler interface methods
 
     bool Null() { return ProcessValue(0, NAN, ValueType::Null); }

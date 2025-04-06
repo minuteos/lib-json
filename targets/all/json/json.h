@@ -12,3 +12,5 @@
 
 #include <json/JsonSimpleReader.h>
 #include <json/JsonSimpleWriter.h>
+
+#include <json/JsonSimpleProcessor.h>

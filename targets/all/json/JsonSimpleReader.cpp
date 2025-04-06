@@ -140,7 +140,7 @@ async_def(
     void Parse()
     {
         fatfs::RapidJsonInputStream is(*f);
-        res = rdr->rd.Parse(is, *rdr);
+        res = rdr->Parse(is);
         delete rdr;
     }
 )
