@@ -60,7 +60,7 @@ public:
     /*! Path of the current key, may be truncated */
     const char* Path() const { return path; }
     /*! Current key, may be truncated */
-    const char* Key() const { return path + stack[depth].offset; }
+    const char* Key() const { return path + (depth ? stack[depth - 1].offset + 1 : 0); }
 
     /*! FNV1a of the entire path including the current key */
     FNV1a PathFNV() const { return stack[depth].path; }
