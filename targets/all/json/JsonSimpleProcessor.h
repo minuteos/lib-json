@@ -25,6 +25,9 @@ public:
 protected:
     fatfs::File& File() const { return *file; }
     const char* Path() const { return path; }
+    Span PathSpan() const { return Span(path, strlen(path)); }
+    Span NameSpan() const { return PathSpan().SplitRight('/'); }
+    Span NameWithoutExtension() const { auto name = NameSpan(); name.SplitRight('.'); return name; }
 
     constexpr kernel::Exception Exception() const { return err.Exception(); }
     void SetResult(intptr_t value) { err = value; }
